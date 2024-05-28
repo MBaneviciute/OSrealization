@@ -1,0 +1,27 @@
+$STA Program1
+$COD
+ADD
+$DAT
+5 3
+$STO Program1
+
+$STA Program2
+$COD
+SUBTRACT
+$DAT
+10 4
+$STO Program2
+
+$STA Program3
+$COD
+MULTIPLY
+$DAT
+6 7
+$STO Program3
+
+$STA Program4
+$COD
+DIVIDE
+$DAT
+20 5
+$STO Program4
