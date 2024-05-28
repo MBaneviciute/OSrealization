@@ -28,6 +28,11 @@ public class Process {
             command.execute(this);
         }
         this.state = "Completed";
+        try {
+            Thread.sleep(1000); // Simulate resource usage with a delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void setResult(int result) {

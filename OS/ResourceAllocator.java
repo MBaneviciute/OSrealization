@@ -8,14 +8,17 @@ public class ResourceAllocator {
         this.processQueue = new LinkedList<>();
     }
 
-    public void requestResource(Process process) {
+    public synchronized void requestResource(Process process) {
+        System.out.println(process.getName() + " is requesting a resource.");
         processQueue.add(process);
     }
 
-    public void processNext() {
+    public synchronized void processNext() {
         Process nextProcess = processQueue.poll();
         if (nextProcess != null) {
+            System.out.println(nextProcess.getName() + " is acquiring the resource.");
             nextProcess.run();
+            System.out.println(nextProcess.getName() + " has released the resource.");
         }
     }
 }
