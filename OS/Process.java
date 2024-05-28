@@ -1,58 +1,33 @@
-import java.util.Queue;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Process {
     private int id;
     private String state;
     private int priority;
-    private String type;
+    private String user;
     private String name;
-    private Queue<Command> commandQueue;
+    private List<Command> commands;
     private int result;
 
-    public Process(int id, String state, int priority, String type, String name) {
+    public Process(int id, String state, int priority, String user, String name) {
         this.id = id;
         this.state = state;
         this.priority = priority;
-        this.type = type;
+        this.user = user;
         this.name = name;
-        this.commandQueue = new LinkedList<>();
-    }
-
-    // Getters and setters for the attributes
-    public int getId() {
-        return id;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
+        this.commands = new ArrayList<>();
     }
 
     public void addCommand(Command command) {
-        commandQueue.add(command);
+        commands.add(command);
     }
 
-    public void executeCommands() {
-        while (!commandQueue.isEmpty()) {
-            Command command = commandQueue.poll();
+    public void run() {
+        for (Command command : commands) {
             command.execute(this);
         }
+        this.state = "Completed";
     }
 
     public void setResult(int result) {
@@ -63,14 +38,7 @@ public class Process {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "Process{" +
-                "id=" + id +
-                ", state='" + state + '\'' +
-                ", priority=" + priority +
-                ", type='" + type + '\'' +
-                ", name='" + name + '\'' +
-                '}';
+    public String getName() {
+        return name;
     }
 }

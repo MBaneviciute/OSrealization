@@ -1,17 +1,19 @@
-import java.util.List;
-
 public class MultiprogrammingOS {
     public static void main(String[] args) {
-        String filePath = "input.txt"; // Update this to the actual file path
-        List<Process> processes = FileParser.parseFile(filePath);
-
         ResourceAllocator allocator = new ResourceAllocator();
-        Supervisor supervisor = new Supervisor(allocator);
+        StopCommand stopCommand = new StopCommand();
+        Supervisor supervisor = new Supervisor(allocator, stopCommand);
 
-        for (Process process : processes) {
-            allocator.requestResource(process);
+        UserInputListener userInputListener = new UserInputListener(stopCommand, allocator);
+        userInputListener.start();
+        supervisor.start();
+
+        try {
+            supervisor.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        supervisor.start();
+        System.out.println("Multiprogramming OS terminated.");
     }
 }

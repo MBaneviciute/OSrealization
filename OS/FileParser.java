@@ -5,60 +5,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileParser {
+
     public static List<Process> parseFile(String filePath) {
         List<Process> processes = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            String programName = "";
-            String operation = "";
-            List<Integer> dataLines = new ArrayList<>();
-            boolean dataSection = false;
-
-            while ((line = br.readLine()) != null) {
+            Process currentProcess = null;
+            String commandType = null;
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.startsWith("$STA")) {
-                    programName = line.split(" ")[1];
-                } else if (line.equals("$COD")) {
-                    // Skip CODE section
-                } else if (line.equals("$DAT")) {
-                    dataSection = true;
+                    String name = line.split(" ")[1];
+                    currentProcess = new Process(1, "New", 1, "user", name);
+                } else if (line.startsWith("$COD")) {
+                    // Skip $COD line
+                } else if (line.startsWith("ADD") || line.startsWith("SUBTRACT") || line.startsWith("MULTIPLY") || line.startsWith("DIVIDE")) {
+                    commandType = line.split(" ")[0];
+                } else if (line.startsWith("$DAT")) {
+                    // The next line will contain the operands
+                    String[] parts = reader.readLine().trim().split(" ");
+                    int op1 = Integer.parseInt(parts[0]);
+                    int op2 = Integer.parseInt(parts[1]);
+                    if ("ADD".equals(commandType)) {
+                        currentProcess.addCommand(new AddCommand(op1, op2));
+                    } else if ("SUBTRACT".equals(commandType)) {
+                        currentProcess.addCommand(new SubtractCommand(op1, op2));
+                    } else if ("MULTIPLY".equals(commandType)) {
+                        currentProcess.addCommand(new MultiplyCommand(op1, op2));
+                    } else if ("DIVIDE".equals(commandType)) {
+                        currentProcess.addCommand(new DivideCommand(op1, op2));
+                    }
                 } else if (line.startsWith("$STO")) {
-                    String stopProgramName = line.split(" ")[1];
-                    if (!programName.equals(stopProgramName)) {
-                        throw new IllegalArgumentException("Mismatched program names in START and STOP sections");
-                    }
-                    if (dataLines.size() != 2) {
-                        throw new IllegalArgumentException("DATA section must contain exactly two numbers");
-                    }
-                    Process process = new Process(processes.size() + 1, "Waiting", 1, "User", programName);
-                    switch (operation) {
-                        case "ADD":
-                            process.addCommand(new AddCommand(dataLines.get(0), dataLines.get(1)));
-                            break;
-                        case "SUBTRACT":
-                            process.addCommand(new SubtractCommand(dataLines.get(0), dataLines.get(1)));
-                            break;
-                        case "MULTIPLY":
-                            process.addCommand(new MultiplyCommand(dataLines.get(0), dataLines.get(1)));
-                            break;
-                        case "DIVIDE":
-                            process.addCommand(new DivideCommand(dataLines.get(0), dataLines.get(1)));
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unsupported operation: " + operation);
-                    }
-                    processes.add(process);
-                    // Reset for next process
-                    programName = "";
-                    dataLines.clear();
-                    dataSection = false;
-                } else if (dataSection) {
-                    String[] parts = line.split(" ");
-                    for (String part : parts) {
-                        dataLines.add(Integer.parseInt(part));
-                    }
-                } else {
-                    operation = line.toUpperCase();
+                    processes.add(currentProcess);
                 }
             }
         } catch (IOException e) {
